@@ -1,0 +1,327 @@
+﻿<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8" />
+    <title> Shopping List API </title>
+    <style>
+        h1 {
+            border-style: solid;
+            background-color: black;
+            font-size: 30px;
+            color: navajowhite;
+            font-weight: bold;
+            border-width: 5px;
+            border-color: #00A4BD #33475B #FF7A59;
+            width: 480px;
+            padding: 10px;
+            box-shadow: 4px 4px #00A4BD, 8px 8px #FF7A59, 12px 12px #334758;
+        }
+        .testbtn {
+            width: auto;
+            height: auto;
+        }
+        footer {
+            text-align: center;
+            font-weight: bold;
+            font-family: Chiller;
+            font-size: 18px;
+            background-color: cadetblue;
+            padding: 20px;
+            margin-top: auto;
+            border-block: solid;
+            border-block-color:darkblue;
+        }
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: antiquewhite;
+        }
+        button {
+            cursor: pointer;
+        }
+        .panda {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 50%;
+            width: 60px;
+            height: 80px;
+        }
+        .crud-form label {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .crud-form button {
+            grid-column: span 2;
+            cursor: pointer;
+        }
+        .crud-form {
+            width: 800px;
+            margin: 20px auto;
+            display: grid;
+            grid-template-columns: 1fr 4fr;
+            grid-template-rows: auto;
+            gap: 10px;
+        }
+        .hidden {
+            display: none;
+        }
+        button[data-operation='deleteItem'] {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+        }
+        button[data-operation='editItem'] {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+        }
+        .item-info input {
+            margin-right: 40px;
+        }
+        .item-info {
+            background-color: lightsalmon;
+            display: grid;
+            grid-template: repeat(2,1fr)/auto 1fr;
+            gap: 4px;
+            padding: 40px;
+            position: relative;
+            border-style: solid;
+            border-color: darkred;
+        }
+        .crud-form label {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .crud-form button {
+            grid-column: span 2;
+            cursor: pointer;
+        }
+        #shoppingList {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1> Shopping List Budgeting Web API </h1>
+        <h2> Create a Shopping List: </h2>
+        <button id="changePageButton"> Yes </button>
+        <hr>
+        <div id="shoppingList"> </div>
+    </main>
+    <footer>
+        <span id="CopyrightInfo"> &copy; 2023 Jonathan Truong & Luis Rojas </span>
+        <span> <br> Class: ISDS 411-01</span>
+        <span> <br> Date: November 14, 2023 </span>
+        <br>
+        <br>
+        <img class="panda" src="https://media.tenor.com/lNtmoshuUI8AAAAi/bahroo-hacker.gif"
+             alt="Computer Nerd" />
+    </footer>
+
+    <script>
+
+        /////////////////////////////////Replace old UI with new UI
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const changePageButton = document.getElementById("changePageButton");
+            changePageButton.addEventListener("click", function () {
+                replaceUI();
+            });
+
+            // Delegate the submit event to the document
+            document.addEventListener("submit", function (e) {
+                let source = e.target;
+                let operation = source.dataset.operation;
+
+                if (operations[operation]) {
+                    e.preventDefault();
+                    operations[operation](source);
+                }
+            });
+        });
+
+        function replaceUI() {
+            document.body.innerHTML = `
+                <form class="crud-form" id="ItemForm" data-operation="createList">
+                    <label for="Name"> Shopping List Name: </label> <input type="text" id="ShoppingListName" name="Name" required />
+                    <label for="Budget"> Set Budget: </label> <input type="number" id="Budget" min="0" step=".01" name="Budget" required />
+                    <label for="Completed"> Completed Checkbox: </label> <input type="checkbox" id="completedCheckbox" name="Completed" />
+
+                    <button type="submit"> Create! </button>
+                </form>
+                <hr>
+                <div id="shoppingList"> </div>
+                <hr>
+                <button id="goBackButton">Go Back</button>
+            `;
+
+            const goBackButton = document.getElementById("goBackButton");
+            goBackButton.addEventListener("click", function () {
+                goBack();
+            });
+
+            getItems();
+        }
+
+        function goBack() {
+            location.reload();
+        }
+
+    ////////////////////////////////
+
+        document.addEventListener("submit", (e) => {
+            let source = e.target;
+            let operation = source.dataset.operation;
+
+            if (operations[operation]) {
+                e.preventDefault();
+                operations[operation](source);
+            }
+        });
+
+        document.addEventListener("click", (e) => {
+            let source = e.target;
+            let operation = source.dataset.operation;
+            let itemId = source.dataset.itemid;
+
+            operations[operation]?.(itemId);
+
+        });
+
+        const operations = {};
+
+        operations.editItem = (itemId) => {
+            let form = document.querySelector(`#form_${itemId}`);
+            form.querySelectorAll("em").forEach((item) => {
+                let type = item.dataset.type;
+                let value = item.dataset.val;
+                let name = item.dataset.name;
+
+                let newHTML = `<input name="${name}" type="${type}" value="${value}">`;
+                item.outerHTML = newHTML;
+            });
+
+            form.querySelector(".hidden").classList.remove("hidden");
+        };
+
+        operations.deleteItem = async (itemId) => {
+            const options = {
+                method: "DELETE"                    //DELETE method = delete/remove any item you do not want
+            };
+            let request = await fetch(`api/Items/${itemId}`, options);
+
+            let response = await request.status;
+
+            console.log(response);
+
+        };
+
+        operations.updateItem = async (source) => {
+            let formData = new FormData(source);
+            let updatedItem = Object.fromEntries(formData.entries());
+
+            let options = {
+                method: "PUT",                      //PUT method = update/edit any item you choose to
+                body: JSON.stringify(updatedItem),
+                headers: {
+                    "content-type": "application/json"
+                }
+            };
+
+            let request = await fetch(`/api/Items/${updatedItem.Id}`, options);
+            let result = await request.status;
+
+            console.log(result);
+
+            getItems();
+
+        };
+
+        operations.createList = async (source) => {
+            if (!(source instanceof HTMLFormElement)) return false;
+
+            let formData = new FormData(source);
+
+            let newList = {
+                Name: formData.get("Name"),
+                Budget: formData.get("Budget"),
+                Completed: formData.get("Completed") === "on",
+            };
+
+            let options = {
+                method: "POST",
+                body: JSON.stringify(newList),
+                headers: {
+                    "content-type": "application/json",
+                },
+            };
+
+            try {
+                let response = await fetch("/api/Items", options);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                let result = await response.json();
+                console.log(result);
+
+                getItems();
+            } catch (error) {
+                console.error("Error creating shopping list:", error);
+            }
+        };
+
+
+        async function getItems() {
+            let items = await fetch("api/Items");
+            items = await items.json();
+
+            if (items.length > 0) {
+                renderItems(items);
+            } else {
+                console.log("No Items Found!");
+            }
+        };
+
+        function renderItems(items) {
+            let shoppingList = document.querySelector("#shoppingList");
+            shoppingList.innerHTML = "";
+
+            const money = x => new Number(x).toFixed(2);
+
+            items.forEach((item) => {
+                let template = `
+        <form id="form_${item.Id}" class="item-info" data-operation="updateItem">
+        <input type="hidden" name="Id" value="${item.Id}">
+
+        <strong>Shopping List Name: </strong><em data-name="Name" data-val="${item.Name}" data-type="text">${item.Name}</em>
+        <strong>Budget: </strong><em data-name="Budget" data-val="${item.Budget}" data-type="number">&dollar;${money(item.Budget)}</em>
+        <strong>Completed: </strong><em data-name="Completed" data-val="${item.Completed}" data-type="bool">${item.Completed}</em>
+     
+
+        <input type="submit" value="Submit" class="hidden">
+      
+        <button data-operation="deleteItem" data-itemid="${item.Id}" type="button"> DELETE </button>
+        <button data-operation="editItem" data-itemid="${item.Id}" type="button"> UPDATE </button>
+
+        </form>
+
+            `;
+                shoppingList.insertAdjacentHTML("beforeend", template);
+
+            });
+        }
+
+        // get items when the page first loads
+
+        getItems();
+
+    </script>
+</body>
+</html>
