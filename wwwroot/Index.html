@@ -1,31 +1,221 @@
 ﻿<!DOCTYPE html>
-<html lang="en-us">
+<html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title> Shopping List API </title>
+    <title> Amazon Shopping Lists</title>
+    <link href="CSS/AddItemForm.css" rel="stylesheet" />
+    <link href="CSS/SL_Form.css" rel="stylesheet" />
     <style>
-       
+        /*insert new css above*/
+        /* Global Font */
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        /* Headers */
+        h1 {
+            text-align: center;
+            font-size: 28px;
+            margin-top: 10px;
+        }
+
+        /* Form container */
+        #SearchForm {
+            max-width: 275px;
+            margin: 0 auto;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: lightyellow;
+        }
+
+        /* Form input fields  */
+        input[type="text"], #idInput {
+            width: 250px;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid black;
+            border-radius: 3px;
+        }
+
+        /* Submit button */
+        input[type="submit"] {
+            background-color: red;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* Summary list */
+        #Summary {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            padding: 10px;
+            max-width: 250px;
+        }
+
+       /* Individual book item and search results */
+         #Summary li, .book-details {
+            flex: auto;
+            margin-left: 10px;
+            margin-right: 10px;
+            margin-bottom: 20px;
+            min-width: 300px;
+        }
+
+        /* Item details */
+        .item-info {
+            background-color: lightsalmon;
+            display: grid;
+            grid-template: repeat(2,1fr)/auto 1fr;
+            gap: 4px;
+            padding: 40px;
+            position: relative;
+            border-style: solid;
+            border-color: darkred;
+        }
     </style>
 </head>
 <body>
     <main>
-        <h1> Shopping List Budgeting Web API </h1>
-        <h2> Create a Shopping List: </h2>
-        <div id="ShoppingListArea"></div>
+        <h1> Shopping Lists</h1>
+        <hr />
+        <h2>Create a New List</h2>
+        <button id="show-form-btn"> Create New Shopping List </button>
+        <form id="ShoppingListForm">
+            <!--Broken Connection to DB? -->
+            <fieldset>
+                <legend> New Shopping List</legend>
+                <br />
+                <label for="NL_Name">Name:</label>
+                <input type="text" id="NL_Name" name="Name" required />
 
+                <label for="NL_Budget">Budget:</label>
+                <input type="text" id="NL_Budget" name="Budget" required />
+                <!--"Completed" checkbox not needed upon the creation of a new list but this code creates that field
+
+                                                <label for="NL_Completed">Completed:</label>
+                                                <input type="checkbox" id="NL_Completed" name="Completed" required />
+                -->
+                <input type="submit" name="Create" value="Create">
+            </fieldset>
+        </form>
+        <!--No connection to DB yet-->
+        <form id="AddItemForm">
+            <fieldset>
+                <legend> New Item</legend>
+                <br />
+                <label for="NI_Name">Name:</label>
+                <input type="text" id="NI_Name" name="Name" required />
+
+                <label for="NI_Price">Price:</label>
+                <input type="text" id="NL_Price" name="Price" required />
+
+                <label for="NI_Description">Description:</label>
+                <input type="text" id="NI_Description" name="Description" required />
+
+                <input type="submit" name="AddItem" value="Add Item">
+
+                <input type="submit" name="CompleteList" value="Complete List">
+            </fieldset>
+        </form>
+        <hr />
+        <h2>ShoppingLists</h2>
+        <ul id="Summary"></ul>
+        <hr />
+        <!--<h2>Search Shopping Lists</h2>
+        <form id="SearchForm">
+             <fieldset>
+                 <label for="idInput">Shopping List Id Number:</label>
+                 <input type="text" id="idInput" name="Id" required />
+                 <input type="submit" value="Search" />
+             </fieldset>
+         </form>
+         <div id="searchedItem"></div>-->
     </main>
-    <footer>
-        <span id="CopyrightInfo"> &copy; 2023 Jonathan Truong & Luis Rojas </span>
-        <span> <br> Class: ISDS 411-01</span>
-        <span> <br> Date: November 14, 2023 </span>
-        <br>
-        <br>
-        <img class="panda" src="https://media.tenor.com/lNtmoshuUI8AAAAi/bahroo-hacker.gif"
-             alt="Computer Nerd" />
-    </footer>
+    <script src="JS/NL_Toggle.js"></script>
+    <script src="JS/Display_NI_Form.js"></script>
+    <script>
+        //include new scripts in a new .js file above.
 
-    <script src="JS/app.js" type="module">
+        document.querySelector('#ShoppingListForm').addEventListener('submit', function (e) { //adds a new book using the form NOT Functional
+            e.preventDefault();
+            const formData = new FormData(this);
+            fetch('api/Items', {
+                method: 'POST',
+                body: JSON.stringify(Object.fromEntries(formData)),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            let shoppingList = document.getElementById('Summary');
+            shoppingList.innerHTML = "";// clears 'Summary'
+            getShoppingLists();
+        });
 
+        async function getShoppingLists() {               //gets books from the database NOT Functional
+            let items = await fetch('api/Items');
+            items = await items.json();
+
+            if (items.length > 0) {
+                renderShoppingLists(items);
+            } else {
+                console.log("No lists found!");
+            }
+
+        }
+
+        function renderShoppingLists(items) {    //Displays book names on html page under available books NOT Functional
+            let shoppingLists = document.getElementById('Summary');
+            shoppingLists.innerHTML = "";// clears 'Summary'
+
+
+            items.forEach((item) => {
+                let template = `
+                                <div class="item-info">
+                                    <strong>Name:</strong> <em>${item.Name}</em>
+                                    <strong>Budget:</strong> <em>${item.Budget}</em>
+                                </div>
+                            `;
+                shoppingLists.insertAdjacentHTML("beforeend", template);
+            });
+        }
+
+        //document.querySelector('#SearchForm').addEventListener('submit', function (e) { //display properties of a book by searching ID with a form NOT Functional
+        //    e.preventDefault();
+        //    const id = document.querySelector('#idInput').value;
+        //    fetch(`api/Items/${id}`, {            // Send a GET request NOT Functional
+        //        method: 'GET',
+        //        headers: {
+        //            'Content-Type': 'application/json'
+        //        }
+        //    })
+        //        .then(response => response.json())
+        //        .then(data => {                // Display the search results NOT Functional
+
+        //            const searchedItem = document.getElementById('searchedItem');
+
+        //            if (data) {
+
+        //                searchedItem.innerHTML = `
+        //                            <strong>Shopping List Name: </strong><em data-name="Name" data-val="${item.Name}" data-type="text">${item.Name}</em>
+        //                            <strong>Budget: </strong><em data-name="Budget" data-val="${item.Budget}" data-type="number">&dollar;${money(item.Budget)}</em>
+
+
+        //                            <input type="submit" value="Submit" class="hidden">
+
+        //                            <button data-operation="deleteItem" data-itemid="${item.Id}" type="button"> DELETE </button>
+        //                            <button data-operation="editItem" data-itemid="${item.Id}" type="button"> UPDATE </button>
+        //                            `;
+        //            } else {
+        //                searchedItem.innerHTML = "Item not found.";
+        //            }
+        //        })
+        //});
+
+        getShoppingLists();
     </script>
 </body>
 </html>

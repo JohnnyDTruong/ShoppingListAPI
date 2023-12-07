@@ -1,5 +1,5 @@
 ﻿import { ShoppingList } from './models/shopping-list.js'
-import { mustache } from './mustache.js';
+import mustache from './mustache.js';
 
 
 
@@ -27,15 +27,25 @@ async function showShoppingList() {
 
     let result = await request.json();
 
-    let listOfLists = {
+    let shoppingLists = [];
+
+    result.forEach((settings) => {
+        shoppingLists.push(new ShoppingList(settings));
+    });
+
+    window.lastResort = result;
+
+    let context = {
         lists: []
     };
 
-    result.forEach((shoppingList) => {
 
-        listOfLists.lists.push(new ShoppingList(shoppingList));
 
+    context.lists = result.sort((a, b) => {
+        return a.Name.localeCompare(b.Name)
     });
+
+    window.currentContext = context;
 
     let html = mustache.render(demoTemplate, context);
 
@@ -44,4 +54,23 @@ async function showShoppingList() {
 
 }
 
+function renderShoppingLists {
+    let target = document.querySelector("#ShoppingListArea");
+    target.innerHTML = html;
+};
+
+
 showShoppingList();
+
+window.sortShoppingListByBudget = function() {
+    const shoppingLists = window.currentContext.lists.sort((a, b) => {
+        return a - b;
+    });
+
+    const newContext = {
+        Items: shoppingLists
+    };
+
+    let html = mustache.render(demoTemplate, newContext);
+
+}

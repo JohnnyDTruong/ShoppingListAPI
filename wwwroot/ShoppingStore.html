@@ -303,10 +303,10 @@
         <strong>Shopping List Name: </strong><em data-name="Name" data-val="${item.Name}" data-type="text">${item.Name}</em>
         <strong>Budget: </strong><em data-name="Budget" data-val="${item.Budget}" data-type="number">&dollar;${money(item.Budget)}</em>
         <strong>Completed: </strong><em data-name="Completed" data-val="${item.Completed}" data-type="bool">${item.Completed}</em>
-     
+
 
         <input type="submit" value="Submit" class="hidden">
-      
+
         <button data-operation="deleteItem" data-itemid="${item.Id}" type="button"> DELETE </button>
         <button data-operation="editItem" data-itemid="${item.Id}" type="button"> UPDATE </button>
 

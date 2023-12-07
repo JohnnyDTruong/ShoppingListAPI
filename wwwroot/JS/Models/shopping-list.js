@@ -16,6 +16,10 @@ export class ShoppingList {
         this.items = [];
     }
 
+    addItem(settings) {
+        const newItem = newItem
+    }
+
     get displayBudget() {
         return `&dollar;${this.Budget.toFixed(2)}`;
     }
