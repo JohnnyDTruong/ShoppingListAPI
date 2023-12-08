@@ -3,8 +3,6 @@
 <head>
     <meta charset="utf-8" />
     <title> Shopping List API </title>
-    <link href="CSS/AddItemForm.css" rel="stylesheet" />
-    <link href="CSS/SL_Form.css" rel="stylesheet" />
     <style>
         h1 {
             border-style: solid;
@@ -105,6 +103,10 @@
             flex-wrap: wrap;
             gap: 5px;
         }
+        .left-align-list {
+            margin-left: 0px;
+            padding-left: 0.5px;
+        }
     </style>
 </head>
 <body>
@@ -113,11 +115,12 @@
         <h2> Create a Shopping List: </h2>
         <button id="changePageButton"> Yes </button>
         <hr>
+        <h2> A list of Shopping Lists: </h2>
         <div id="shoppingList"> </div>
 
         <!--<input type="hidden" name="ShoppingListName" value="" />
-        <input type="hidden" name="ShoppingListBudget" value="" />
-        <input type="hidden" name="ShoppingListCompleted" value="" />-->
+    <input type="hidden" name="ShoppingListBudget" value="" />
+    <input type="hidden" name="ShoppingListCompleted" value="" />-->
     </main>
     <footer>
 
@@ -157,7 +160,7 @@
                 <form class="crud-form" id="ItemForm" data-operation="createList">
                     <label for="Name"> Shopping List Name: </label> <input type="text" id="Name" name="Name" required />
                     <label for="Budget"> Set Budget: </label> <input type="number" id="Price" min="0" step=".01" name="Budget" required />
-                    <label for="Completed"> Completed Checkbox: </label> <input type="text" id="completedCheckbox" name="Completed" />
+                    <label for="Completed"> Completed (true or false): </label> <input type="text" id="Completed" name="Completed" />
 
                     <button type="submit"> Create! </button>
                 </form>
@@ -319,7 +322,17 @@
             <strong>Shopping List Name: </strong><em data-name="Name" data-val="${item.Name}" data-type="text">${item.Name}</em>
             <strong>Budget: </strong><em data-name="Budget" data-val="${item.Budget}" data-type="number">&dollar;${money(item.Budget)}</em>
             <strong>Completed: </strong><em data-name="Completed" data-val="${item.Completed}" data-type="text">${item.Completed}</em>
-
+            <strong>Items:</strong>
+                    <ul class="left-align-list">
+                        ${item.Items.map(itemObj => `
+                        <hr>
+                            <strong>Item Name: </strong> <em data-name="ItemName" data-val="${itemObj.Name}" data-type="text">${itemObj.Name}</em> <br>
+                            <strong>Price: </strong> <em data-name="Price" data-val="${itemObj.Price}" data-type="Number">&dollar;${itemObj.Price}</em> <br>
+                            <strong>Selected: </strong> <em data-name="Selected" data-val="${itemObj.Selected}" data-type="text">${itemObj.Selected}</em> <br>
+                            <strong>Description: </strong> <em data-name="Description" data-val="${itemObj.Description}" data-type="text">${itemObj.Description}</em>
+                            <br> <hr>
+                        `).join('')}
+                    </ul>
 
             <input type="submit" value="Submit" class="hidden">
 
