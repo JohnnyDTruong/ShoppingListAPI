@@ -1,0 +1,46 @@
+[{
+  "_id": {
+    "$oid": "655bf79fe1ccd446947c4d0c"
+  },
+  "Name": "Essentials #1",
+  "Budget": 554.99,
+  "Completed": false,
+  "Items": [
+    {
+      "Name": "DELL Laptop",
+      "Price": 440.99,
+      "Selected": false,
+      "Description": "Laptop with touch screen and voice control capabilities"
+    },
+    {
+      "Name": "Cinnamon Toast Crunch",
+      "Price": 2.5,
+      "Selected": false,
+      "Description": "General Mill's tasty, crunchy, and sweet cereal"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "6567ea81e5539a19080e7d72"
+  },
+  "Name": "Essentials #2",
+  "Budget": "100",
+  "Completed": false,
+  "Items": [
+    {
+      "_id": null,
+      "Name": "Frozen Pizza",
+      "Price": "10",
+      "Selected": true,
+      "Description": "Delicious Pepperoni Pizza for hungry people."
+    },
+    {
+      "_id": null,
+      "Name": "Nintendo Switch",
+      "Price": "80",
+      "Selected": true,
+      "Description": "Fun device to play video games."
+    }
+  ]
+}]

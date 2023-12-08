@@ -8,6 +8,6 @@
 }
 
 #ShoppingListForm label {
-    display: block;
+    display: none;
     margin-bottom: 5px;
 }

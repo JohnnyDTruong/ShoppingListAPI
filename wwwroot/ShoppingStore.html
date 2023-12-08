@@ -3,6 +3,8 @@
 <head>
     <meta charset="utf-8" />
     <title> Shopping List API </title>
+    <link href="CSS/AddItemForm.css" rel="stylesheet" />
+    <link href="CSS/SL_Form.css" rel="stylesheet" />
     <style>
         h1 {
             border-style: solid;
@@ -29,7 +31,7 @@
             padding: 20px;
             margin-top: auto;
             border-block: solid;
-            border-block-color:darkblue;
+            border-block-color: darkblue;
         }
         body {
             min-height: 100vh;
@@ -112,8 +114,13 @@
         <button id="changePageButton"> Yes </button>
         <hr>
         <div id="shoppingList"> </div>
+
+        <!--<input type="hidden" name="ShoppingListName" value="" />
+        <input type="hidden" name="ShoppingListBudget" value="" />
+        <input type="hidden" name="ShoppingListCompleted" value="" />-->
     </main>
     <footer>
+
         <span id="CopyrightInfo"> &copy; 2023 Jonathan Truong & Luis Rojas </span>
         <span> <br> Class: ISDS 411-01</span>
         <span> <br> Date: November 14, 2023 </span>
@@ -148,9 +155,9 @@
         function replaceUI() {
             document.body.innerHTML = `
                 <form class="crud-form" id="ItemForm" data-operation="createList">
-                    <label for="Name"> Shopping List Name: </label> <input type="text" id="ShoppingListName" name="Name" required />
-                    <label for="Budget"> Set Budget: </label> <input type="number" id="Budget" min="0" step=".01" name="Budget" required />
-                    <label for="Completed"> Completed Checkbox: </label> <input type="checkbox" id="completedCheckbox" name="Completed" />
+                    <label for="Name"> Shopping List Name: </label> <input type="text" id="Name" name="Name" required />
+                    <label for="Budget"> Set Budget: </label> <input type="number" id="Price" min="0" step=".01" name="Budget" required />
+                    <label for="Completed"> Completed Checkbox: </label> <input type="text" id="completedCheckbox" name="Completed" />
 
                     <button type="submit"> Create! </button>
                 </form>
@@ -173,6 +180,7 @@
         }
 
     ////////////////////////////////
+
 
         document.addEventListener("submit", (e) => {
             let source = e.target;
@@ -225,6 +233,10 @@
             let formData = new FormData(source);
             let updatedItem = Object.fromEntries(formData.entries());
 
+            updatedItem.Completed = updatedItem.Completed === "true" ? true : false;
+
+            updatedItem.Items = [];
+
             let options = {
                 method: "PUT",                      //PUT method = update/edit any item you choose to
                 body: JSON.stringify(updatedItem),
@@ -249,7 +261,7 @@
 
             let newList = {
                 Name: formData.get("Name"),
-                Budget: formData.get("Budget"),
+                Budget: parseFloat(formData.get("Budget")), // Convert to a number
                 Completed: formData.get("Completed") === "on",
             };
 
@@ -257,7 +269,7 @@
                 method: "POST",
                 body: JSON.stringify(newList),
                 headers: {
-                    "content-type": "application/json",
+                    "Content-Type": "application/json", // Correct header name
                 },
             };
 
@@ -271,12 +283,16 @@
                 let result = await response.json();
                 console.log(result);
 
+                // Optionally, you can redirect or perform other actions after creating the list.
+                // For now, let's just log a message.
+                console.log("Shopping list created successfully!");
+
+                // Refresh the list after creating a new one
                 getItems();
             } catch (error) {
                 console.error("Error creating shopping list:", error);
             }
         };
-
 
         async function getItems() {
             let items = await fetch("api/Items");
@@ -297,22 +313,23 @@
 
             items.forEach((item) => {
                 let template = `
-        <form id="form_${item.Id}" class="item-info" data-operation="updateItem">
-        <input type="hidden" name="Id" value="${item.Id}">
+            <form id="form_${item.Id}" class="item-info" data-operation="updateItem">
+            <input type="hidden" name="Id" value="${item.Id}">
 
-        <strong>Shopping List Name: </strong><em data-name="Name" data-val="${item.Name}" data-type="text">${item.Name}</em>
-        <strong>Budget: </strong><em data-name="Budget" data-val="${item.Budget}" data-type="number">&dollar;${money(item.Budget)}</em>
-        <strong>Completed: </strong><em data-name="Completed" data-val="${item.Completed}" data-type="bool">${item.Completed}</em>
+            <strong>Shopping List Name: </strong><em data-name="Name" data-val="${item.Name}" data-type="text">${item.Name}</em>
+            <strong>Budget: </strong><em data-name="Budget" data-val="${item.Budget}" data-type="number">&dollar;${money(item.Budget)}</em>
+            <strong>Completed: </strong><em data-name="Completed" data-val="${item.Completed}" data-type="text">${item.Completed}</em>
 
 
-        <input type="submit" value="Submit" class="hidden">
+            <input type="submit" value="Submit" class="hidden">
 
-        <button data-operation="deleteItem" data-itemid="${item.Id}" type="button"> DELETE </button>
-        <button data-operation="editItem" data-itemid="${item.Id}" type="button"> UPDATE </button>
+            <button data-operation="deleteItem" data-itemid="${item.Id}" type="button"> DELETE </button>
+            <button data-operation="editItem" data-itemid="${item.Id}" type="button"> UPDATE </button>
+            <button data-operation="AddItem" data-itemid="${item.Id}" type="button"> ADD-Item </button>
 
-        </form>
+            </form>
 
-            `;
+                `;
                 shoppingList.insertAdjacentHTML("beforeend", template);
 
             });

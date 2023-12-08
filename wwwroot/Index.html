@@ -135,8 +135,8 @@
          </form>
          <div id="searchedItem"></div>-->
     </main>
-    <script src="JS/NL_Toggle.js"></script>
     <script src="JS/Display_NI_Form.js"></script>
+    <script src="JS/NL_Toggle.js"></script>
     <script>
         //include new scripts in a new .js file above.
 
@@ -174,11 +174,11 @@
 
             items.forEach((item) => {
                 let template = `
-                                <div class="item-info">
-                                    <strong>Name:</strong> <em>${item.Name}</em>
-                                    <strong>Budget:</strong> <em>${item.Budget}</em>
-                                </div>
-                            `;
+                                    <div class="item-info">
+                                        <strong>Name:</strong> <em>${item.Name}</em>
+                                        <strong>Budget:</strong> <em>${item.Budget}</em>
+                                    </div>
+                                `;
                 shoppingLists.insertAdjacentHTML("beforeend", template);
             });
         }
