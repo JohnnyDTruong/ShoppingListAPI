@@ -1,76 +1,76 @@
-﻿//import { ShoppingList } from './models/shopping-list.js'
-//import mustache from './mustache.js';
+﻿import { ShoppingList } from './models/shopping-list.js'
+import mustache from './mustache.js';
 
 
 
-//const demoTemplate = `
+const demoTemplate = `
 
-//{{#lists}}
-//    <p>
+{{#lists}}
+    <p>
 
-//    <strong>Name: </strong> {{Name}}
-//    <br>
-//    <strong>Budget: </strong> {{{displayBudget}}}}
-//    <br>
-//    <strong>Completed: </strong> {{Completed}}
-//    </p>
-//    <hr>
-//{{/lists}}
+    <strong>Name: </strong> {{Name}}
+    <br>
+    <strong>Budget: </strong> {{{displayBudget}}}}
+    <br>
+    <strong>Completed: </strong> {{Completed}}
+    </p>
+    <hr>
+{{/lists}}
 
-//`;
-
-
-//async function showShoppingList() {
-//    let url = "api/Items";
-
-//    let request = fetch(url);
-
-//    let result = await request.json();
-
-//    let shoppingLists = [];
-
-//    result.forEach((settings) => {
-//        shoppingLists.push(new ShoppingList(settings));
-//    });
-
-//    window.lastResort = result;
-
-//    let context = {
-//        lists: []
-//    };
+`;
 
 
+async function showShoppingList() {
+    let url = "api/Items";
 
-//    context.lists = result.sort((a, b) => {
-//        return a.Name.localeCompare(b.Name)
-//    });
+    let request = fetch(url);
 
-//    window.currentContext = context;
+    let result = await request.json();
 
-//    let html = mustache.render(demoTemplate, context);
+    let shoppingLists = [];
 
-//    let target = document.querySelector("#ShoppingListArea");
-//    target.innerHTML = html;
+    result.forEach((settings) => {
+        shoppingLists.push(new ShoppingList(settings));
+    });
 
-//}
+    window.lastResort = result;
 
-//function renderShoppingLists {
-//    let target = document.querySelector("#ShoppingListArea");
-//    target.innerHTML = html;
-//};
+    let context = {
+        lists: []
+    };
 
 
-//showShoppingList();
 
-//window.sortShoppingListByBudget = function() {
-//    const shoppingLists = window.currentContext.lists.sort((a, b) => {
-//        return a - b;
-//    });
+    context.lists = result.sort((a, b) => {
+        return a.Name.localeCompare(b.Name)
+    });
 
-//    const newContext = {
-//        Items: shoppingLists
-//    };
+    window.currentContext = context;
 
-//    let html = mustache.render(demoTemplate, newContext);
+    let html = mustache.render(demoTemplate, context);
 
-//}
+    let target = document.querySelector("#ShoppingListArea");
+    target.innerHTML = html;
+
+}
+
+function renderShoppingLists {
+    let target = document.querySelector("#ShoppingListArea");
+    target.innerHTML = html;
+};
+
+
+showShoppingList();
+
+window.sortShoppingListByBudget = function() {
+    const shoppingLists = window.currentContext.lists.sort((a, b) => {
+        return a - b;
+    });
+
+    const newContext = {
+        Items: shoppingLists
+    };
+
+    let html = mustache.render(demoTemplate, newContext);
+
+}

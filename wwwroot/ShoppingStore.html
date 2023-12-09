@@ -119,8 +119,8 @@
         <div id="shoppingList"> </div>
 
         <!--<input type="hidden" name="ShoppingListName" value="" />
-    <input type="hidden" name="ShoppingListBudget" value="" />
-    <input type="hidden" name="ShoppingListCompleted" value="" />-->
+        <input type="hidden" name="ShoppingListBudget" value="" />
+        <input type="hidden" name="ShoppingListCompleted" value="" />-->
     </main>
     <footer>
 
@@ -133,6 +133,7 @@
              alt="Computer Nerd" />
     </footer>
 
+    <script src="JS/ADD-ItemButton.js"></script>
     <script>
 
         /////////////////////////////////Replace old UI with new UI
@@ -152,23 +153,27 @@
                     e.preventDefault();
                     operations[operation](source);
                 }
+                if (operation === "createList") {
+                    clearInputFields();
+                }
             });
         });
 
         function replaceUI() {
             document.body.innerHTML = `
-                <form class="crud-form" id="ItemForm" data-operation="createList">
-                    <label for="Name"> Shopping List Name: </label> <input type="text" id="Name" name="Name" required />
-                    <label for="Budget"> Set Budget: </label> <input type="number" id="Price" min="0" step=".01" name="Budget" required />
-                    <label for="Completed"> Completed (true or false): </label> <input type="text" id="Completed" name="Completed" />
+                                <form class="crud-form" id="ItemForm" data-operation="createList">
+                                    <label for="Name"> Shopping List Name: </label> <input type="text" id="Name" name="Name" required />
+                                    <label for="Budget"> Set Budget: </label> <input type="number" id="Budget" min="0" step=".01" name="Budget" required />
+                                    <label for="Completed"> Completed (true or false): </label> <input type="text" id="Completed" name="Completed" />
 
-                    <button type="submit"> Create! </button>
-                </form>
-                <hr>
-                <div id="shoppingList"> </div>
-                <hr>
-                <button id="goBackButton">Go Back</button>
-            `;
+                                    <button type="submit"> Create! </button>
+                                </form>
+                                <hr>
+                                <h2> A list of Shopping Lists: </h2>
+                                <div id="shoppingList"> </div>
+                                <hr>
+                                <button id="goBackButton">Go Back</button>
+                            `;
 
             const goBackButton = document.getElementById("goBackButton");
             goBackButton.addEventListener("click", function () {
@@ -182,18 +187,23 @@
             location.reload();
         }
 
-    ////////////////////////////////
+        function clearInputFields() {
+            document.getElementById("Name").value = "";
+            document.getElementById("Budget").value = "";
+            document.getElementById("Completed").value = "";
+        }
 
+        ////////////////////////////////
 
-        document.addEventListener("submit", (e) => {
-            let source = e.target;
-            let operation = source.dataset.operation;
+        //document.addEventListener("submit", (e) => {
+        //    let source = e.target;
+        //    let operation = source.dataset.operation;
 
-            if (operations[operation]) {
-                e.preventDefault();
-                operations[operation](source);
-            }
-        });
+        //    if (operations[operation]) {
+        //        e.preventDefault();
+        //        operations[operation](source);
+        //    }
+        //});
 
         document.addEventListener("click", (e) => {
             let source = e.target;
@@ -230,31 +240,39 @@
 
             console.log(response);
 
+            const deletedItemForm = document.getElementById(`form_${itemId}`);
+            deletedItemForm.remove();
+
         };
 
-        operations.updateItem = async (source) => {
+         operations.updateItem = async (source) => {
             let formData = new FormData(source);
-            let updatedItem = Object.fromEntries(formData.entries());
+            let updatedItemData = Object.fromEntries(formData.entries());
 
-            updatedItem.Completed = updatedItem.Completed === "true" ? true : false;
+            // Fetch the existing item data
+            let existingItemResponse = await fetch(`/api/Items/${updatedItemData.Id}`);
+            let existingItem = await existingItemResponse.json();
 
-            updatedItem.Items = [];
+            // Merge the original Items array with the updated one
+             updatedItemData.Items = existingItem.Items;
+
+            // Convert "Completed" to boolean
+            updatedItemData.Completed = updatedItemData.Completed === "true" ? true : false;
 
             let options = {
-                method: "PUT",                      //PUT method = update/edit any item you choose to
-                body: JSON.stringify(updatedItem),
+                method: "PUT",
+                body: JSON.stringify(updatedItemData),
                 headers: {
                     "content-type": "application/json"
                 }
             };
 
-            let request = await fetch(`/api/Items/${updatedItem.Id}`, options);
+            let request = await fetch(`/api/Items/${updatedItemData.Id}`, options);
             let result = await request.status;
 
             console.log(result);
 
             getItems();
-
         };
 
         operations.createList = async (source) => {
@@ -266,6 +284,7 @@
                 Name: formData.get("Name"),
                 Budget: parseFloat(formData.get("Budget")), // Convert to a number
                 Completed: formData.get("Completed") === "on",
+                Items: [],
             };
 
             let options = {
@@ -286,8 +305,6 @@
                 let result = await response.json();
                 console.log(result);
 
-                // Optionally, you can redirect or perform other actions after creating the list.
-                // For now, let's just log a message.
                 console.log("Shopping list created successfully!");
 
                 // Refresh the list after creating a new one
@@ -316,33 +333,34 @@
 
             items.forEach((item) => {
                 let template = `
-            <form id="form_${item.Id}" class="item-info" data-operation="updateItem">
-            <input type="hidden" name="Id" value="${item.Id}">
+                            <form id="form_${item.Id}" class="item-info" data-operation="updateItem">
+                            <input type="hidden" name="Id" value="${item.Id}">
 
-            <strong>Shopping List Name: </strong><em data-name="Name" data-val="${item.Name}" data-type="text">${item.Name}</em>
-            <strong>Budget: </strong><em data-name="Budget" data-val="${item.Budget}" data-type="number">&dollar;${money(item.Budget)}</em>
-            <strong>Completed: </strong><em data-name="Completed" data-val="${item.Completed}" data-type="text">${item.Completed}</em>
-            <strong>Items:</strong>
-                    <ul class="left-align-list">
-                        ${item.Items.map(itemObj => `
-                        <hr>
-                            <strong>Item Name: </strong> <em data-name="ItemName" data-val="${itemObj.Name}" data-type="text">${itemObj.Name}</em> <br>
-                            <strong>Price: </strong> <em data-name="Price" data-val="${itemObj.Price}" data-type="Number">&dollar;${itemObj.Price}</em> <br>
-                            <strong>Selected: </strong> <em data-name="Selected" data-val="${itemObj.Selected}" data-type="text">${itemObj.Selected}</em> <br>
-                            <strong>Description: </strong> <em data-name="Description" data-val="${itemObj.Description}" data-type="text">${itemObj.Description}</em>
-                            <br> <hr>
-                        `).join('')}
-                    </ul>
+                            <strong>Shopping List Name: </strong><em data-name="Name" data-val="${item.Name}" data-type="text">${item.Name}</em>
+                            <strong>Budget: </strong><em data-name="Budget" data-val="${item.Budget}" data-type="number">&dollar;${money(item.Budget)}</em>
+                            <strong>Completed: </strong><em data-name="Completed" data-val="${item.Completed}" data-type="text">${item.Completed}</em>
+                            <strong>Items:</strong>
+                                    <ul class="left-align-list">
+                                        ${item.Items.map(itemObj => `
+                                        <hr>
+                                            <strong>Item ID: </strong> <em data-name="ItemIdentifier" data-val="${itemObj.Id}" data-type="text">${itemObj.Id}</em> <br>
+                                            <strong>Item Name: </strong> <em data-name="ItemName" data-val="${itemObj.Name}" data-type="text">${itemObj.Name}</em> <br>
+                                            <strong>Price: </strong> <em data-name="Price" data-val="${itemObj.Price}" data-type="Number">&dollar;${itemObj.Price}</em> <br>
+                                            <strong>Selected: </strong> <em data-name="Selected" data-val="${itemObj.Selected}" data-type="text">${itemObj.Selected}</em> <br>
+                                            <strong>Description: </strong> <em data-name="Description" data-val="${itemObj.Description}" data-type="text">${itemObj.Description}</em>
+                                        <hr><br>
+                                        `).join('')}
+                                    </ul>
 
-            <input type="submit" value="Submit" class="hidden">
+                            <input type="submit" value="Submit" class="hidden">
 
-            <button data-operation="deleteItem" data-itemid="${item.Id}" type="button"> DELETE </button>
-            <button data-operation="editItem" data-itemid="${item.Id}" type="button"> UPDATE </button>
-            <button data-operation="AddItem" data-itemid="${item.Id}" type="button"> ADD-Item </button>
+                            <button data-operation="deleteItem" data-itemid="${item.Id}" type="button"> DELETE </button>
+                            <button data-operation="editItem" data-itemid="${item.Id}" type="button"> UPDATE </button>
+                            <button data-operation="AddItem" data-itemid="${item.Id}" type="button"> ADD-Item </button>
 
-            </form>
+                            </form>
 
-                `;
+                                `;
                 shoppingList.insertAdjacentHTML("beforeend", template);
 
             });
