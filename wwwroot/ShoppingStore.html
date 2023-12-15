@@ -3,111 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <title> Shopping List API </title>
-    <style>
-        h1 {
-            border-style: solid;
-            background-color: black;
-            font-size: 30px;
-            color: navajowhite;
-            font-weight: bold;
-            border-width: 5px;
-            border-color: #00A4BD #33475B #FF7A59;
-            width: 480px;
-            padding: 10px;
-            box-shadow: 4px 4px #00A4BD, 8px 8px #FF7A59, 12px 12px #334758;
-        }
-        .testbtn {
-            width: auto;
-            height: auto;
-        }
-        footer {
-            text-align: center;
-            font-weight: bold;
-            font-family: Chiller;
-            font-size: 18px;
-            background-color: cadetblue;
-            padding: 20px;
-            margin-top: auto;
-            border-block: solid;
-            border-block-color: darkblue;
-        }
-        body {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            background-color: antiquewhite;
-        }
-        button {
-            cursor: pointer;
-        }
-        .panda {
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-            width: 50%;
-            width: 60px;
-            height: 80px;
-        }
-        .crud-form label {
-            font-size: 18px;
-            font-weight: bold;
-        }
-        .crud-form button {
-            grid-column: span 2;
-            cursor: pointer;
-        }
-        .crud-form {
-            width: 800px;
-            margin: 20px auto;
-            display: grid;
-            grid-template-columns: 1fr 4fr;
-            grid-template-rows: auto;
-            gap: 10px;
-        }
-        .hidden {
-            display: none;
-        }
-        button[data-operation='deleteItem'] {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-        }
-        button[data-operation='editItem'] {
-            position: absolute;
-            bottom: 5px;
-            right: 5px;
-        }
-        .item-info input {
-            margin-right: 40px;
-        }
-        .item-info {
-            background-color: lightsalmon;
-            display: grid;
-            grid-template: repeat(2,1fr)/auto 1fr;
-            gap: 4px;
-            padding: 40px;
-            position: relative;
-            border-style: solid;
-            border-color: darkred;
-        }
-        .crud-form label {
-            font-size: 18px;
-            font-weight: bold;
-        }
-        .crud-form button {
-            grid-column: span 2;
-            cursor: pointer;
-        }
-        #shoppingList {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-        }
-        .left-align-list {
-            margin-left: 0px;
-            padding-left: 0.5px;
-        }
-    </style>
+    <link href="CSS/app.css" rel="stylesheet" />
 </head>
 <body>
     <main>
@@ -121,9 +17,14 @@
         <!--<input type="hidden" name="ShoppingListName" value="" />
         <input type="hidden" name="ShoppingListBudget" value="" />
         <input type="hidden" name="ShoppingListCompleted" value="" />-->
+        <br>
+        <button id="sortButton">
+            Sort Shopping List by Name and Status
+        </button>
+        <br>
+        <hr>
     </main>
     <footer>
-
         <span id="CopyrightInfo"> &copy; 2023 Jonathan Truong & Luis Rojas </span>
         <span> <br> Class: ISDS 411-01</span>
         <span> <br> Date: November 14, 2023 </span>
@@ -133,9 +34,7 @@
              alt="Computer Nerd" />
     </footer>
 
-    <script src="JS/ADD-ItemButton.js"></script>
     <script>
-
         /////////////////////////////////Replace old UI with new UI
 
         document.addEventListener("DOMContentLoaded", function () {
@@ -161,19 +60,32 @@
 
         function replaceUI() {
             document.body.innerHTML = `
-                                <form class="crud-form" id="ItemForm" data-operation="createList">
-                                    <label for="Name"> Shopping List Name: </label> <input type="text" id="Name" name="Name" required />
-                                    <label for="Budget"> Set Budget: </label> <input type="number" id="Budget" min="0" step=".01" name="Budget" required />
-                                    <label for="Completed"> Completed (true or false): </label> <input type="text" id="Completed" name="Completed" />
+                                    <form class="crud-form" id="ItemForm" data-operation="createList">
+                                        <label for="Name"> Shopping List Name: </label> <input type="text" id="Name" name="Name" required />
+                                        <label for="Budget"> Set Budget: </label> <input type="number" id="Budget" min="0" step=".01" name="Budget" required />
+                                        <label for="Completed"> Completed (true or false): </label> <input type="text" id="Completed" name="Completed" />
 
-                                    <button type="submit"> Create! </button>
-                                </form>
-                                <hr>
-                                <h2> A list of Shopping Lists: </h2>
-                                <div id="shoppingList"> </div>
-                                <hr>
-                                <button id="goBackButton">Go Back</button>
-                            `;
+                                        <button type="submit"> Create! </button>
+                                    </form>
+                                    <hr>
+                                    <h2> A list of Shopping Lists: </h2>
+                                    <div id="shoppingList"> </div>
+                                    <br>
+                                    <hr>
+                                    <br>
+                                    <button id="sortButton">
+                                            Sort Shopping List by Name and Status
+                                    </button>
+                                    <br>
+                                    <hr>
+                                    <br>
+                                    <button id="goBackButton">Go Back</button>
+                                `;
+
+            const sortButton = document.getElementById("sortButton");
+            sortButton.addEventListener("click", function () {
+                sortShoppingListNames();
+            });
 
             const goBackButton = document.getElementById("goBackButton");
             goBackButton.addEventListener("click", function () {
@@ -245,35 +157,83 @@
 
         };
 
-         operations.updateItem = async (source) => {
+        operations.updateItem = async (source) => {
             let formData = new FormData(source);
             let updatedItemData = Object.fromEntries(formData.entries());
 
-            // Fetch the existing item data
-            let existingItemResponse = await fetch(`/api/Items/${updatedItemData.Id}`);
-            let existingItem = await existingItemResponse.json();
+            // Fetch the existing shopping list data
+            let shoppingListId = updatedItemData.Id;
+            let shoppingListResponse = await fetch(`/api/Items/${shoppingListId}`);
+            let shoppingList = await shoppingListResponse.json();
 
-            // Merge the original Items array with the updated one
-             updatedItemData.Items = existingItem.Items;
+            // Update the main fields of the shopping list
+            shoppingList.Name = updatedItemData.Name;
+            shoppingList.Budget = parseFloat(updatedItemData.Budget);
+            shoppingList.Completed = updatedItemData.Completed === "true";
 
-            // Convert "Completed" to boolean
-            updatedItemData.Completed = updatedItemData.Completed === "true" ? true : false;
+            // Update the nested fields of the items in the Items array
+            let updatedItems = shoppingList.Items.map((item) => {
+                let itemId = item.Id;
+                let itemData = updatedItemData[`Item_${itemId}`];
+                if (itemData) {
+                    item.Name = itemData.Name;
+                    item.Price = parseFloat(itemData.Price);
+                    item.Selected = itemData.Selected === "true";
+                    item.Description = itemData.Description;
+                }
+                return item;
+            });
 
+            // Assign the updatedItems array back to shoppingList.Items
+            shoppingList.Items = updatedItems;
+
+            // Save the modified shopping list back to the database
             let options = {
                 method: "PUT",
-                body: JSON.stringify(updatedItemData),
+                body: JSON.stringify(shoppingList),
                 headers: {
                     "content-type": "application/json"
                 }
             };
 
-            let request = await fetch(`/api/Items/${updatedItemData.Id}`, options);
+            let request = await fetch(`/api/Items/${shoppingListId}`, options);
             let result = await request.status;
 
             console.log(result);
 
             getItems();
         };
+
+
+        //operations.updateItem = async (source) => {
+        //    let formData = new FormData(source);
+        //    let updatedItemData = Object.fromEntries(formData.entries());
+
+        //    // Fetch the existing item data
+        //    let existingItemResponse = await fetch(`/api/Items/${updatedItemData.Id}`);
+        //    let existingItem = await existingItemResponse.json();
+
+        //    // Merge the original Items array with the updated one
+        //    updatedItemData.Items = existingItem.Items;
+
+        //    // Convert "Completed" to boolean
+        //    updatedItemData.Completed = updatedItemData.Completed === "true" ? true : false;
+
+        //    let options = {
+        //        method: "PUT",
+        //        body: JSON.stringify(updatedItemData),
+        //        headers: {
+        //            "content-type": "application/json"
+        //        }
+        //    };
+
+        //    let request = await fetch(`/api/Items/${updatedItemData.Id}`, options);
+        //    let result = await request.status;
+
+        //    console.log(result);
+
+        //    getItems();
+        //};
 
         operations.createList = async (source) => {
             if (!(source instanceof HTMLFormElement)) return false;
@@ -283,7 +243,7 @@
             let newList = {
                 Name: formData.get("Name"),
                 Budget: parseFloat(formData.get("Budget")), // Convert to a number
-                Completed: formData.get("Completed") === "on",
+                Completed: formData.get("Completed") === "true",
                 Items: [],
             };
 
@@ -333,34 +293,33 @@
 
             items.forEach((item) => {
                 let template = `
-                            <form id="form_${item.Id}" class="item-info" data-operation="updateItem">
-                            <input type="hidden" name="Id" value="${item.Id}">
+                    <form id="form_${item.Id}" class="item-info" data-operation="updateItem">
+                    <input type="hidden" name="Id" value="${item.Id}">
 
-                            <strong>Shopping List Name: </strong><em data-name="Name" data-val="${item.Name}" data-type="text">${item.Name}</em>
-                            <strong>Budget: </strong><em data-name="Budget" data-val="${item.Budget}" data-type="number">&dollar;${money(item.Budget)}</em>
-                            <strong>Completed: </strong><em data-name="Completed" data-val="${item.Completed}" data-type="text">${item.Completed}</em>
-                            <strong>Items:</strong>
-                                    <ul class="left-align-list">
-                                        ${item.Items.map(itemObj => `
-                                        <hr>
-                                            <strong>Item ID: </strong> <em data-name="ItemIdentifier" data-val="${itemObj.Id}" data-type="text">${itemObj.Id}</em> <br>
-                                            <strong>Item Name: </strong> <em data-name="ItemName" data-val="${itemObj.Name}" data-type="text">${itemObj.Name}</em> <br>
-                                            <strong>Price: </strong> <em data-name="Price" data-val="${itemObj.Price}" data-type="Number">&dollar;${itemObj.Price}</em> <br>
-                                            <strong>Selected: </strong> <em data-name="Selected" data-val="${itemObj.Selected}" data-type="text">${itemObj.Selected}</em> <br>
-                                            <strong>Description: </strong> <em data-name="Description" data-val="${itemObj.Description}" data-type="text">${itemObj.Description}</em>
-                                        <hr><br>
-                                        `).join('')}
-                                    </ul>
+                    <strong>Shopping List Name: </strong><em data-name="Name" data-val="${item.Name}" data-type="text">${item.Name}</em>
+                    <strong>Budget: </strong><em data-name="Budget" data-val="${item.Budget}" data-type="number">&dollar;${money(item.Budget)}</em>
+                    <strong>Completed: </strong><em data-name="Completed" data-val="${item.Completed}" data-type="text">${item.Completed}</em>
+                    <strong>Items:</strong>
+                            <ul class="left-align-list">
+                                ${item.Items.map(itemObj => `
+                                <hr>
+                                    <strong>Item Name: </strong> <em data-name="ItemName" data-val="${itemObj.Name}" data-type="text">${itemObj.Name}</em> <br>
+                                    <strong>Price: </strong> <em data-name="Price" data-val="${itemObj.Price}" data-type="Number">&dollar;${itemObj.Price}</em> <br>
+                                    <strong>Selected: </strong> <em data-name="Selected" data-val="${itemObj.Selected}" data-type="text">${itemObj.Selected}</em> <br>
+                                    <strong>Description: </strong> <em data-name="Description" data-val="${itemObj.Description}" data-type="text">${itemObj.Description}</em>
+                                <hr><br>
+                                `).join('')}
+                            </ul>
 
-                            <input type="submit" value="Submit" class="hidden">
+                    <input type="submit" value="Submit" class="hidden">
 
-                            <button data-operation="deleteItem" data-itemid="${item.Id}" type="button"> DELETE </button>
-                            <button data-operation="editItem" data-itemid="${item.Id}" type="button"> UPDATE </button>
-                            <button data-operation="AddItem" data-itemid="${item.Id}" type="button"> ADD-Item </button>
+                    <button data-operation="deleteItem" data-itemid="${item.Id}" type="button"> DELETE </button>
+                    <button data-operation="editItem" data-itemid="${item.Id}" type="button"> UPDATE </button>
+                    <button data-operation="AddItem" data-itemid="${item.Id}" type="button"> ADD-Item </button>
 
-                            </form>
+                    </form>
 
-                                `;
+                                                        `;
                 shoppingList.insertAdjacentHTML("beforeend", template);
 
             });
@@ -369,6 +328,76 @@
         // get items when the page first loads
 
         getItems();
+
+
+        // This is used to have button to sort base A-Z list name//
+
+        function sortShoppingListNames() {
+            const shoppingList = document.querySelector("#shoppingList");
+            const listForms = Array.from(shoppingList.querySelectorAll(".item-info"));
+
+            const sortedListForms = listForms.sort((a, b) => {
+                const nameA = a.querySelector("em[data-name='Name']").dataset.val.toUpperCase();
+                const nameB = b.querySelector("em[data-name='Name']").dataset.val.toUpperCase();
+
+                if (nameA < nameB) {
+                    return -1;
+                }
+                if (nameA > nameB) {
+                    return 1;
+                }
+                return 0;
+            });
+
+            shoppingList.innerHTML = "";
+
+            sortedListForms.forEach((form) => {
+                shoppingList.appendChild(form);
+            });
+        }
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const sortButton = document.getElementById("sortButton");
+            sortButton.addEventListener("click", function () {
+                sortShoppingListNames();
+            });
+        });
+        // sorts by status button //
+
+        function sortShoppingListsByStatus() {
+            const shoppingList = document.querySelector("#shoppingList");
+            const listForms = Array.from(shoppingList.querySelectorAll(".item-info"));
+
+            const sortedListForms = listForms.sort((a, b) => {
+                const statusA = a.querySelector("em[data-name='Completed']").dataset.val.toUpperCase();
+                const statusB = b.querySelector("em[data-name='Completed']").dataset.val.toUpperCase();
+
+                if (statusA < statusB) {
+                    return -1;
+                }
+                if (statusA > statusB) {
+                    return 1;
+                }
+                return 0;
+            });
+
+            shoppingList.innerHTML = "";
+
+            sortedListForms.forEach((form) => {
+                shoppingList.appendChild(form);
+            });
+        }
+        async function getItems() {
+            let items = await fetch("api/Items");
+            items = await items.json();
+
+            if (items.length > 0) {
+                renderItems(items);
+                sortShoppingListsByStatus(); // Sort by status //
+            } else {
+                console.log("No Items Found!");
+            }
+        }
 
     </script>
 </body>

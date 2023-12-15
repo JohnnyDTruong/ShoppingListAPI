@@ -6,9 +6,6 @@ namespace ShoppingListAPI.Models;
 
 public class ShoppingItem
 {
-    [BsonId]
-    [BsonRepresentation(BsonType.ObjectId)]
-    public string? Id { get; set; }
 
     [BsonElement("Name")]
     [JsonPropertyName("Name")]
