@@ -1,0 +1,66 @@
+[{
+  "_id": {
+    "$oid": "657b79d43757da39670f73e8"
+  },
+  "Name": "Essentials #100",
+  "Budget": "10000",
+  "Completed": false,
+  "Items": [
+    {
+      "Name": "Frozen Chicken",
+      "Price": "12",
+      "Selected": true,
+      "Description": "Delicious Popeyes Chicken for hungry people."
+    },
+    {
+      "Name": "PS5",
+      "Price": "500",
+      "Selected": true,
+      "Description": "Fun device to play video games."
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "657b79e73757da39670f73e9"
+  },
+  "Name": "Essentials #2",
+  "Budget": "100",
+  "Completed": false,
+  "Items": [
+    {
+      "Name": "Frozen Pizza",
+      "Price": "10",
+      "Selected": true,
+      "Description": "Delicious Pepperoni Pizza for hungry people."
+    },
+    {
+      "Name": "Nintendo Switch",
+      "Price": "80",
+      "Selected": true,
+      "Description": "Fun device to play video games."
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "657b7a043757da39670f73ea"
+  },
+  "Name": "Essentials #3",
+  "Budget": "854.99",
+  "Completed": false,
+  "Items": [
+    {
+      "Name": "DELL Laptop",
+      "Price": "440.99",
+      "Selected": true,
+      "Description": "Laptop with touch screen and voice control capabilities"
+    },
+    {
+      "Name": "Cinnamon Toast Crunch",
+      "Price": "2.5",
+      "Selected": true,
+      "Description": "General Mill's tasty, crunchy, and sweet cereal"
+    }
+  ]
+}]
